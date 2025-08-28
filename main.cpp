@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <unordered_map>
+#include <vector>
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -54,6 +56,7 @@ private:
         // GLFW will handle windows for us so we need to get the extensions it needs and pass it to Vulkan
         uint32_t glfwExtensionCount = 0;
         const char **glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+        checkSupportedExtensions(glfwExtensions, &glfwExtensionCount);
         createInfo.enabledExtensionCount = glfwExtensionCount;
         createInfo.ppEnabledExtensionNames = glfwExtensions;
 
@@ -67,6 +70,34 @@ private:
         }
     }
 
+    void checkSupportedExtensions(const char **requiredExtensions, const uint32_t *extensionCount) {
+        // Request just the number of supported Extensions
+        uint32_t supportedExtensionCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &supportedExtensionCount, nullptr);
+
+        // Get the extension details
+        std::vector<VkExtensionProperties> extensions(supportedExtensionCount);
+        vkEnumerateInstanceExtensionProperties(nullptr, &supportedExtensionCount, extensions.data());
+
+        // Extra credit to check if the required extensions are supported
+        std::unordered_map<std::string, std::string> supportedExtensionsLut{};
+
+        for (const VkExtensionProperties &extension : extensions) {
+            supportedExtensionsLut.insert({extension.extensionName, extension.extensionName});
+        }
+
+        std::cout << "Required Extensions:\n";
+        for (int i = 0; i < *extensionCount; i++) {
+            std::cout << "\t" << requiredExtensions[i];
+
+            if (supportedExtensionsLut.contains(requiredExtensions[i])) {
+                std::cout << " (supported)" << "\n";
+            } else {
+                std::cout << " (not supported)" << "\n";
+            }
+        }
+    }
+
     void initVulkan() { createInstance(); }
 
     void mainLoop() {
@@ -76,6 +107,7 @@ private:
     }
 
     void cleanup() {
+        vkDestroyInstance(instance, nullptr);
         glfwDestroyWindow(window);
         glfwTerminate();
     }
