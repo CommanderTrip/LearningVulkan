@@ -32,9 +32,19 @@ private:
         // Create the actual window
         window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
     }
+
     void initVulkan() {}
-    void mainLoop() {}
-    void cleanup() {}
+
+    void mainLoop() {
+        while (!glfwWindowShouldClose(window)) {
+            glfwPollEvents();
+        }
+    }
+
+    void cleanup() {
+        glfwDestroyWindow(window);
+        glfwTerminate();
+    }
 };
 
 int main() {
