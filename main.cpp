@@ -10,6 +10,14 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
+const char *validationLayers[] = {"VK_LAYER_KHRONOS_validation"};
+
+#ifdef NDEBUG
+const bool enableValidationLayers = false;
+#else
+const bool enableValidationLayers = true;
+#endif
+
 class HelloTriangleApplication {
     GLFWwindow *window;
     VkInstance instance;
@@ -35,8 +43,14 @@ private:
         // Create the actual window
         window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
     }
+
     void createInstance() {
         // This is the connection between my app and the Vulkan lib
+
+        // Inserted later - Enable Vk Validation Layers
+        if (enableValidationLayers && !checkValidationLayerSupport()) {
+            throw std::runtime_error("Validation layers requested but not available.");
+        }
 
         // Info about our application
         // It's optional but helps the driver optimize
@@ -52,6 +66,14 @@ private:
         VkInstanceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
+
+        // Now Includes validation layers
+        if (enableValidationLayers) {
+            createInfo.enabledLayerCount = std::size(validationLayers);
+            createInfo.ppEnabledLayerNames = validationLayers;
+        } else {
+            createInfo.enabledLayerCount = 0;
+        }
 
         // GLFW will handle windows for us so we need to get the extensions it needs and pass it to Vulkan
         uint32_t glfwExtensionCount = 0;
@@ -96,6 +118,33 @@ private:
                 std::cout << " (not supported)" << "\n";
             }
         }
+    }
+
+    bool checkValidationLayerSupport() {
+        // Get the number of layer properties
+        uint32_t layerCount;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+        // My method again for checking two lists
+        std::unordered_map<std::string, int> requestedValidationLayersLut{};
+        for (const char *requestedLayer : validationLayers) {
+            requestedValidationLayersLut.insert({requestedLayer, 0});
+        }
+
+        for (const auto &layer : availableLayers) {
+            if (requestedValidationLayersLut.contains(layer.layerName)) {
+                requestedValidationLayersLut[layer.layerName]++;
+            }
+        }
+
+        for (auto &pair : requestedValidationLayersLut) {
+            if (pair.second == 0) return false;
+        }
+
+        return true;
     }
 
     void initVulkan() { createInstance(); }
