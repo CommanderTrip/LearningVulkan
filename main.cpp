@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
@@ -39,9 +40,17 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
     }
 }
 
+// We need to check which queue families are supported by the device
+struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+
+    bool isComplete() { return graphicsFamily.has_value(); }
+};
+
 class HelloTriangleApplication {
     GLFWwindow *window;
     VkInstance instance;
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;  // implicitly destroyed when `instance` is destroyed
     VkDebugUtilsMessengerEXT debugMessenger;
 
 public:
@@ -182,11 +191,6 @@ private:
         return true;
     }
 
-    void initVulkan() {
-        createInstance();
-        setupDebugMessenger();
-    }
-
     void setupDebugMessenger() {
         if (!enableValidationLayers) return;
 
@@ -233,6 +237,71 @@ private:
 
         // Indicates if the Vulkan call that triggered the validation layer message should be aborted
         return VK_FALSE;  // Normally keep false
+    }
+
+    void pickPhysicalDevice() {
+        uint32_t deviceCount = 0;
+        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+        if (deviceCount == 0) throw std::runtime_error("Failed to find GPUs that support Vulkan");
+
+        std::vector<VkPhysicalDevice> devices(deviceCount);
+        vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+        for (const auto &device : devices) {
+            if (isDeviceSuitable(device)) {
+                physicalDevice = device;
+                break;
+            }
+        }
+
+        if (physicalDevice == VK_NULL_HANDLE) throw std::runtime_error("No suitable GPUs");
+    }
+
+    bool isDeviceSuitable(VkPhysicalDevice device) {
+        // Basic device properties like the name, type and supported Vulkan version
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+        // Optional features like texture compression, 64-bit floats and multi viewport rendering
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        // As an example
+        // return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
+        // We could also score the devices and get the most suitable one
+
+        // Since all we care about is Vulkan support and queue families right now
+        bool supportsVulkan1_3 = deviceProperties.apiVersion >= VK_VERSION_1_3;
+        QueueFamilyIndices queueFamilies = findQueueFamilies(device);
+
+        return supportsVulkan1_3 && queueFamilies.isComplete();
+    }
+
+    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
+        QueueFamilyIndices indices;
+
+        uint32_t queueFamilyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+        // Find the indices in the queue families of the queues we need
+        int i = 0;
+        for (const auto &queueFamily : queueFamilies) {
+            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) indices.graphicsFamily = i;
+            if (indices.isComplete()) break;
+            i++;
+        }
+
+        return indices;
+    }
+
+    void initVulkan() {
+        createInstance();
+        setupDebugMessenger();
+        pickPhysicalDevice();
     }
 
     void mainLoop() {
