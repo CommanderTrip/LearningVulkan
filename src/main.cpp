@@ -50,8 +50,10 @@ struct QueueFamilyIndices {
 class HelloTriangleApplication {
     GLFWwindow *window;
     VkInstance instance;
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;  // implicitly destroyed when `instance` is destroyed
     VkDebugUtilsMessengerEXT debugMessenger;
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;  // implicitly destroyed when `instance` is destroyed
+    VkDevice device;
+    VkQueue graphicsQueue;  // Queues are implicitly destroyed with the device is destroyed
 
 public:
     void run() {
@@ -298,10 +300,50 @@ private:
         return indices;
     }
 
+    void createLogicalDevice() {
+        QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+        // Specifies the queues we want
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+        queueCreateInfo.queueCount = 1;
+        float queuePriority = 1.0f;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+
+        // The specifies what special features we want to use
+        VkPhysicalDeviceFeatures deviceFeatures{};
+
+        // Finally create the logical device
+        VkDeviceCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.pQueueCreateInfos = &queueCreateInfo;
+        createInfo.queueCreateInfoCount = 1;
+        createInfo.pEnabledFeatures = &deviceFeatures;
+
+        // Similar to VkInstanceCreateInfo but device specific
+        // Don't need extensions for now
+        createInfo.enabledExtensionCount = 0;
+
+        if (enableValidationLayers) {  // Newer versions don't need this but good for compatibility
+            createInfo.enabledLayerCount = std::size(validationLayers);
+            createInfo.ppEnabledLayerNames = validationLayers;
+        } else {
+            createInfo.enabledLayerCount = 0;
+        }
+
+        if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create logical device");
+        }
+
+        vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+    }
+
     void initVulkan() {
         createInstance();
         setupDebugMessenger();
         pickPhysicalDevice();
+        createLogicalDevice();
     }
 
     void mainLoop() {
@@ -315,6 +357,7 @@ private:
             DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
         }
 
+        vkDestroyDevice(device, nullptr);
         vkDestroyInstance(instance, nullptr);
         glfwDestroyWindow(window);
         glfwTerminate();
