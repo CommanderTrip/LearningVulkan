@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <optional>
+#include <set>
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>
@@ -43,8 +44,9 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 // We need to check which queue families are supported by the device
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentationFamily;  // In case the drawing queue and the presentation queue do not overlap
 
-    bool isComplete() { return graphicsFamily.has_value(); }
+    bool isComplete() const { return graphicsFamily.has_value() && presentationFamily.has_value(); }
 };
 
 class HelloTriangleApplication {
@@ -54,6 +56,8 @@ class HelloTriangleApplication {
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;  // implicitly destroyed when `instance` is destroyed
     VkDevice device;
     VkQueue graphicsQueue;  // Queues are implicitly destroyed with the device is destroyed
+    VkQueue presentationQueue;
+    VkSurfaceKHR surface;
 
 public:
     void run() {
@@ -148,10 +152,10 @@ private:
         vkEnumerateInstanceExtensionProperties(nullptr, &supportedExtensionCount, extensions.data());
 
         // Extra credit to check if the required extensions are supported
-        std::unordered_map<std::string, std::string> supportedExtensionsLut{};
+        std::set<std::string> supportedExtensionsLut{};
 
         for (const VkExtensionProperties &extension : extensions) {
-            supportedExtensionsLut.insert({extension.extensionName, extension.extensionName});
+            supportedExtensionsLut.insert({extension.extensionName});
         }
 
         std::cout << "Required Extensions:\n";
@@ -241,6 +245,12 @@ private:
         return VK_FALSE;  // Normally keep false
     }
 
+    void createSurface() {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create window surface");
+        }
+    }
+
     void pickPhysicalDevice() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -290,9 +300,17 @@ private:
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
         // Find the indices in the queue families of the queues we need
+        VkBool32 presentationSupport = false;
         int i = 0;
         for (const auto &queueFamily : queueFamilies) {
             if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) indices.graphicsFamily = i;
+
+            // Will likely be the graphics family too but this is a more general support
+            if (!presentationSupport) {
+                vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentationSupport);
+                if (presentationSupport) indices.presentationFamily = i;
+            }
+
             if (indices.isComplete()) break;
             i++;
         }
@@ -302,14 +320,22 @@ private:
 
     void createLogicalDevice() {
         QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+        std::set queueFamilySet = {indices.graphicsFamily.value(), indices.presentationFamily.value()};
+
+        // This is not pre-allocated because values in the set could map to the same key, so the set could be smaller
+        // than it appears e.g. graphics and presentation families are typically the same but might not be.
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
         // Specifies the queues we want
-        VkDeviceQueueCreateInfo queueCreateInfo{};
-        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-        queueCreateInfo.queueCount = 1;
         float queuePriority = 1.0f;
-        queueCreateInfo.pQueuePriorities = &queuePriority;
+        for (uint32_t queueFamily : queueFamilySet) {
+            VkDeviceQueueCreateInfo queueCreateInfo{};
+            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queueCreateInfo.queueFamilyIndex = queueFamily;
+            queueCreateInfo.queueCount = 1;
+            queueCreateInfo.pQueuePriorities = &queuePriority;
+            queueCreateInfos.push_back(queueCreateInfo);
+        }
 
         // The specifies what special features we want to use
         VkPhysicalDeviceFeatures deviceFeatures{};
@@ -317,8 +343,8 @@ private:
         // Finally create the logical device
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        createInfo.pQueueCreateInfos = &queueCreateInfo;
-        createInfo.queueCreateInfoCount = 1;
+        createInfo.pQueueCreateInfos = queueCreateInfos.data();
+        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
         createInfo.pEnabledFeatures = &deviceFeatures;
 
         // Similar to VkInstanceCreateInfo but device specific
@@ -337,11 +363,13 @@ private:
         }
 
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+        vkGetDeviceQueue(device, indices.presentationFamily.value(), 0, &graphicsQueue);
     }
 
     void initVulkan() {
         createInstance();
         setupDebugMessenger();
+        createSurface();
         pickPhysicalDevice();
         createLogicalDevice();
     }
@@ -358,6 +386,7 @@ private:
         }
 
         vkDestroyDevice(device, nullptr);
+        vkDestroySurfaceKHR(instance, surface, nullptr);
         vkDestroyInstance(instance, nullptr);
         glfwDestroyWindow(window);
         glfwTerminate();
