@@ -1,9 +1,16 @@
-#IDE
+# IDE
 .idea/
 
 # CMake Build
 cmake-build-debug/
 cmake-build-release/
+
+# Shader Compile Files
+shaders/compileShaders.bat
+shaders/compileShaders.sh
+
+# Shader Output files
+*.spv
 
 # Prerequisites
 *.d
