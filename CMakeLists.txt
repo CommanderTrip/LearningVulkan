@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 20)
 project(vk-learning)
 
-add_executable(vk-learning src/main.cpp)
+file(GLOB pve_SRC CONFIGURE_DEPENDS
+        "src/*.hpp"
+        "src/*.cpp"
+        "src/**/*.hpp"
+        "src/**/*.cpp"
+)
+
+add_executable(vk-learning ${pve_SRC})
 
 find_package(Vulkan REQUIRED)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
