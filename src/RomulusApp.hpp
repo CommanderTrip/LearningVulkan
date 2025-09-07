@@ -1,22 +1,19 @@
 #pragma once
 
-#include "engine/PveWindow.hpp"
+#include "engine/PveEntry.hpp"
 
 namespace pve {
 
     class RomulusApp {
-        PveWindow _window{WIDTH, HEIGHT, WINDOW_NAME};
+        static constexpr const char *WINDOW_NAME = "Romulus";
+        PveEntry _engine{};
 
-        void mainLoop();
+        void mainLoop() const;
 
     public:
-        static constexpr int WIDTH = 600;
-        static constexpr int HEIGHT = 400;
-        static constexpr std::string WINDOW_NAME = "Romulus";
-
         RomulusApp();
         ~RomulusApp();
 
-        void run();
+        void run() const;
     };
 }

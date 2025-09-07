@@ -1,7 +1,7 @@
 #include "PveWindow.hpp"
 
 namespace pve {
-    PveWindow::PveWindow(int width, int height, std::string windowName)
+    PveWindow::PveWindow(int width, int height, const char *windowName)
         : _width(width), _height(height), _windowName(windowName) {
         _window = initWindow();
     }

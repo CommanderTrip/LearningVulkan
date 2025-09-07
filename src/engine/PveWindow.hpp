@@ -9,14 +9,11 @@ namespace pve {
 
     class PveWindow {
         GLFWwindow *_window;
-        const int _width;
-        const int _height;
-        const std::string _windowName;
 
         GLFWwindow *initWindow() const;
 
     public:
-        PveWindow(int width, int height, std::string windowName);
+        PveWindow(int width, int height, const char *windowName);
         PveWindow(const PveWindow &) = delete;
         PveWindow &operator=(const PveWindow &) = delete;
         ~PveWindow();
