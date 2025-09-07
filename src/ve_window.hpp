@@ -23,6 +23,7 @@ public:
     ~VeWindow();
 
     [[nodiscard]] bool shouldClose() const { return glfwWindowShouldClose(_window); }
+    void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 };
 
 }  // namespace ve
