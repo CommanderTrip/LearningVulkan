@@ -1,3 +1,5 @@
+#include "RomulusApp.hpp"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -996,12 +998,14 @@ private:
 };
 
 int main() {
-    HelloTriangleApplication app;
+    // HelloTriangleApplication app;
+    pve::RomulusApp mainApp{};
 
     try {
-        app.run();
-    } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        // app.run();
+        mainApp.run();
+    } catch (const std::exception &ex) {
+        std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
 

@@ -1,3 +1,3 @@
-#include "pve_debugger.hpp"
+#include "PveDebugger.hpp"
 
-namespace pve {}  // namespace pve
+namespace pve {}
