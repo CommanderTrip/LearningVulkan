@@ -2,6 +2,11 @@
 #include "PveEntry.hpp"
 
 namespace pve {
-    PveEntry::PveEntry() {}
+
+    void PveEntry::mainLoop() {
+        while (!_window.shouldClose()) {
+            glfwPollEvents();
+        }
+    }
 
 }

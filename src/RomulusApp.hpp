@@ -5,15 +5,12 @@
 namespace pve {
 
     class RomulusApp {
-        static constexpr const char *WINDOW_NAME = "Romulus";
         PveEntry _engine{};
 
-        void mainLoop() const;
-
     public:
-        RomulusApp();
-        ~RomulusApp();
+        RomulusApp() = default;
+        ~RomulusApp() = default;
 
-        void run() const;
+        void run() { _engine.mainLoop(); }
     };
 }
