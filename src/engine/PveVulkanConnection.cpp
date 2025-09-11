@@ -14,13 +14,13 @@ namespace pve {
         }
 
         // Info about the application; optional but can help optimize
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = appName;
-        appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
-        appInfo.pEngineName = engineName;
-        appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_4;
+        VkApplicationInfo appInfo{
+            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            .pApplicationName = appName,
+            .applicationVersion = VK_MAKE_VERSION(0, 0, 0),
+            .pEngineName = engineName,
+            .apiVersion = VK_API_VERSION_1_4,
+        };
 
         // Information about what extensions and validation layers to include
         VkInstanceCreateInfo createInfo{};
