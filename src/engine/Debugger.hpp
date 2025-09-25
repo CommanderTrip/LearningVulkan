@@ -6,6 +6,7 @@
 
 namespace pve {
     class Debugger {
+// Changes depending on the build mode.
 #ifdef NDEBUG
         const bool _enableValidationLayers = false;
 #else
@@ -14,18 +15,27 @@ namespace pve {
         const char *const _validationLayers[1] = {"VK_LAYER_KHRONOS_validation"};
 
     public:
+        VkDebugUtilsMessengerEXT debugMessenger = nullptr;
+
         Debugger() = default;
-        ~Debugger();
+        ~Debugger() = default;
 
         bool isValidationEnabled() const { return _enableValidationLayers; }
         uint32_t getValidationLayersCount() const { return std::size(_validationLayers); }
         const char *const *getValidationLayerNames() const { return _validationLayers; }
-        bool areValidationLayersSupported() const;
+        bool checkValidationLayerSupport() const;
 
-        // Because this function is an extension function, it is not automatically loaded, and we have to find it
-        VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
+        static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                                            VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                            const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+                                                            void *pUserData);
+
+        VkResult createDebugUtilsMessengerEXT(VkInstance instance,
                                               const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
                                               const VkAllocationCallbacks *pAllocator,
                                               VkDebugUtilsMessengerEXT *pDebugMessenger);
+
+        void destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+                                           const VkAllocationCallbacks *pAllocator);
     };
 }

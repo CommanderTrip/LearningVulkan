@@ -3,7 +3,10 @@
 
 namespace pve {
 
-    void Engine::mainLoop() {
+    /**
+     * Main loop of the program. Application will perpetually loop here.
+     */
+    void Engine::mainLoop() const {
         while (!_window.shouldClose()) {
             glfwPollEvents();
         }

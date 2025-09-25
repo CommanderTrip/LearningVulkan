@@ -18,7 +18,7 @@ namespace pve {
         Engine() = default;
         ~Engine() = default;
 
-        void mainLoop();
+        void mainLoop() const;
     };
 
 }
