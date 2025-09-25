@@ -1,15 +1,15 @@
-#include "PveDebugger.hpp"
-
 #include <vulkan/vulkan_core.h>
 
 #include <set>
 #include <string>
 #include <vector>
 
-namespace pve {
-    PveDebugger::~PveDebugger() {}
+#include "Debugger.hpp"
 
-    bool PveDebugger::areValidationLayersSupported() const {
+namespace pve {
+    Debugger::~Debugger() {}
+
+    bool Debugger::areValidationLayersSupported() const {
         // Similar to pve::PveVulkanConnection::_areRequiredExtSupported
 
         // Get the layer properties

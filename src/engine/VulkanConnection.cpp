@@ -1,4 +1,4 @@
-#include "PveVulkanConnection.hpp"
+#include "VulkanConnection.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -8,7 +8,7 @@
 
 namespace pve {
     /// The `createInstance` function from the Vulkan guide
-    PveVulkanConnection::PveVulkanConnection(const char* appName, const char* engineName) {
+    VulkanConnection::VulkanConnection(const char* appName, const char* engineName) {
         if (_debugger.isValidationEnabled() && !_debugger.areValidationLayersSupported()) {
             throw std::runtime_error("Validation layers requested but not available");
         }
@@ -42,7 +42,7 @@ namespace pve {
             throw std::runtime_error("Failed to create Vulkan Instance");
     }
 
-    std::vector<const char*> PveVulkanConnection::_getRequiredExtensions() {
+    std::vector<const char*> VulkanConnection::_getRequiredExtensions() {
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
@@ -55,8 +55,8 @@ namespace pve {
         return extensions;
     }
 
-    bool PveVulkanConnection::_areRequiredExtSupported(const char** requiredExtensions,
-                                                       const uint32_t requiredExtensionCount) {
+    bool VulkanConnection::_areRequiredExtSupported(const char** requiredExtensions,
+                                                    const uint32_t requiredExtensionCount) {
         // Get the supported extensions
         uint32_t supportedExtensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &supportedExtensionCount, nullptr);

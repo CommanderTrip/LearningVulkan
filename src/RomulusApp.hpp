@@ -1,11 +1,11 @@
 #pragma once
 
-#include "engine/PveEntry.hpp"
+#include "engine/Engine.hpp"
 
-namespace pve {
+namespace romulus {
 
     class RomulusApp {
-        PveEntry _engine{};
+        pve::Engine _engine{};
 
     public:
         RomulusApp() = default;

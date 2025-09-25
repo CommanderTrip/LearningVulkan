@@ -3,18 +3,18 @@
 
 #include <vector>
 
-#include "PveDebugger.hpp"
+#include "Debugger.hpp"
 
 namespace pve {
-    class PveVulkanConnection {
+    class VulkanConnection {
         VkInstance _instance;
-        PveDebugger _debugger;
+        Debugger _debugger;
 
         std::vector<const char *> _getRequiredExtensions();
         bool _areRequiredExtSupported(const char **requiredExtensions, uint32_t requiredExtensionCount);
 
     public:
-        PveVulkanConnection(const char *appName, const char *engineName);
-        ~PveVulkanConnection() { vkDestroyInstance(_instance, nullptr); }
+        VulkanConnection(const char *appName, const char *engineName);
+        ~VulkanConnection() { vkDestroyInstance(_instance, nullptr); }
     };
 }

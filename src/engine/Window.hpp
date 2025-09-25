@@ -7,14 +7,14 @@
 
 namespace pve {
 
-    class PveWindow {
+    class Window {
         GLFWwindow *_window = nullptr;
 
     public:
-        PveWindow(int width, int height, const char *windowName);
-        PveWindow(const PveWindow &) = delete;
-        PveWindow &operator=(const PveWindow &) = delete;
-        ~PveWindow();
+        Window(int width, int height, const char *windowName);
+        Window(const Window &) = delete;
+        Window &operator=(const Window &) = delete;
+        ~Window();
 
         [[nodiscard]] bool shouldClose() const { return glfwWindowShouldClose(_window); };
     };

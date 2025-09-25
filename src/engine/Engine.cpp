@@ -1,9 +1,9 @@
 
-#include "PveEntry.hpp"
+#include "Engine.hpp"
 
 namespace pve {
 
-    void PveEntry::mainLoop() {
+    void Engine::mainLoop() {
         while (!_window.shouldClose()) {
             glfwPollEvents();
         }

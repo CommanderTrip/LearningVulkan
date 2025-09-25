@@ -5,7 +5,7 @@
 #include <iterator>
 
 namespace pve {
-    class PveDebugger {
+    class Debugger {
 #ifdef NDEBUG
         const bool _enableValidationLayers = false;
 #else
@@ -14,8 +14,8 @@ namespace pve {
         const char *const _validationLayers[1] = {"VK_LAYER_KHRONOS_validation"};
 
     public:
-        PveDebugger() = default;
-        ~PveDebugger();
+        Debugger() = default;
+        ~Debugger();
 
         bool isValidationEnabled() const { return _enableValidationLayers; }
         uint32_t getValidationLayersCount() const { return std::size(_validationLayers); }
