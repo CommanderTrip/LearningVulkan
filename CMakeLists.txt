@@ -9,7 +9,9 @@ file(GLOB pve_SRC CONFIGURE_DEPENDS
         "src/**/*.cpp"
 )
 
-add_executable(vk-learning ${pve_SRC})
+add_executable(vk-learning ${pve_SRC}
+        src/engine/PhysicalDeviceSelection.cpp
+        src/engine/PhysicalDeviceSelection.hpp)
 
 find_package(Vulkan REQUIRED)
 target_include_directories(${PROJECT_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
