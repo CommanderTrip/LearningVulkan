@@ -94,7 +94,7 @@ namespace pve {
     /**
      * Picks a logical device to interface with the physical device.
      */
-    void PhysicalDeviceSelection::pickLogicalDevice() {
+    void PhysicalDeviceSelection::pickLogicalDevice(Debugger debugger) {
         // Why are we doing this again? Can't we save the results from the last time we did this?
         QueueFamilyIndices indices = _findQueueFamilies(_physicalDevice);
 
@@ -111,8 +111,8 @@ namespace pve {
 
         VkDeviceCreateInfo deviceCreateInfo{
             .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            .pQueueCreateInfos = &queueCreateInfo,
             .queueCreateInfoCount = 1,
+            .pQueueCreateInfos = &queueCreateInfo,
             .pEnabledFeatures = &deviceFeatures,
         };
 
@@ -124,9 +124,9 @@ namespace pve {
         // Still good to include it for backwards compatibility.
         deviceCreateInfo.enabledExtensionCount = 0;
 
-        if (_debugger.isValidationEnabled()) {
-            deviceCreateInfo.enabledLayerCount = _debugger.getValidationLayersCount();
-            deviceCreateInfo.ppEnabledLayerNames = _debugger.getValidationLayerNames();
+        if (debugger.isValidationEnabled()) {
+            deviceCreateInfo.enabledLayerCount = debugger.getValidationLayersCount();
+            deviceCreateInfo.ppEnabledLayerNames = debugger.getValidationLayerNames();
         } else {
             deviceCreateInfo.enabledLayerCount = 0;
         }

@@ -10,7 +10,7 @@ namespace pve {
     class VulkanConnection {
         VkInstance _instance;
         Debugger _debugger;
-        PhysicalDeviceSelection _physicalDevice{_debugger};
+        PhysicalDeviceSelection _physicalDevice;
 
         void _createInstance(const char *appName, const char *engineName);
         void _setupDebugMessenger();

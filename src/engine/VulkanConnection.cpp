@@ -17,7 +17,7 @@ namespace pve {
         _createInstance(appName, engineName);
         _setupDebugMessenger();
         _physicalDevice.pickPhysicalDevice(_instance);
-        _physicalDevice.pickLogicalDevice();
+        _physicalDevice.pickLogicalDevice(_debugger);
     }
 
     VulkanConnection::~VulkanConnection() {

@@ -8,7 +8,6 @@
 
 namespace pve {
     class PhysicalDeviceSelection {
-        Debugger &_debugger;
         VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;  // Implicitly destroyed with the VkInstance
         VkDevice _device = VK_NULL_HANDLE;                  // Logical device that interfaces with the physical device
 
@@ -25,9 +24,9 @@ namespace pve {
     public:
         VkQueue graphicsQueue;  // All queues are implicitly destroyed with the VkInstance
 
-        explicit PhysicalDeviceSelection(Debugger &debugger) : _debugger(debugger) {};
+        PhysicalDeviceSelection() = default;
         ~PhysicalDeviceSelection() { vkDestroyDevice(_device, nullptr); };
         void pickPhysicalDevice(VkInstance &instance);
-        void pickLogicalDevice();
+        void pickLogicalDevice(Debugger debugger);
     };
 }
