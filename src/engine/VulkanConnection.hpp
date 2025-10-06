@@ -10,11 +10,10 @@ namespace pve {
     class VulkanConnection {
         VkInstance _instance;
         Debugger _debugger;
-        PhysicalDeviceSelection _physicalDevice;
+        PhysicalDeviceSelection _physicalDevice{_debugger};
 
         void _createInstance(const char *appName, const char *engineName);
         void _setupDebugMessenger();
-        void _pickPhysicalDevice();
 
         std::vector<const char *> _getRequiredExtensions();
         bool _areRequiredExtSupported(const char **requiredExtensions, uint32_t requiredExtensionCount);

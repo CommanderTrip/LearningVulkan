@@ -22,6 +22,7 @@ namespace pve {
         QueueFamilyIndices indices = _findQueueFamilies(device);
 
         if (indices.isComplete()) {
+            // TODO: Should move this print out after this function call but I wanted to keep the code above here
             std::cout << "Selecting: " << deviceProperties.deviceName << "\n";
             return true;
         }
@@ -88,6 +89,53 @@ namespace pve {
         if (_physicalDevice == VK_NULL_HANDLE) {
             throw std::runtime_error("Failed to find suitable GPU.");
         }
+    }
+
+    /**
+     * Picks a logical device to interface with the physical device.
+     */
+    void PhysicalDeviceSelection::pickLogicalDevice() {
+        // Why are we doing this again? Can't we save the results from the last time we did this?
+        QueueFamilyIndices indices = _findQueueFamilies(_physicalDevice);
+
+        float queuePriority = 1.0f;  // 0 to 1
+        VkDeviceQueueCreateInfo queueCreateInfo{
+            .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            .queueFamilyIndex = indices.graphicsFamily.value(),
+            .queueCount = 1,
+            .pQueuePriorities = &queuePriority,
+        };
+
+        // Don't need anything special now, but we might want to later
+        VkPhysicalDeviceFeatures deviceFeatures{};
+
+        VkDeviceCreateInfo deviceCreateInfo{
+            .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+            .pQueueCreateInfos = &queueCreateInfo,
+            .queueCreateInfoCount = 1,
+            .pEnabledFeatures = &deviceFeatures,
+        };
+
+        /*
+         * This is similar to the VkInstance createInfo where we defined extensions but this time it is device specific
+         */
+
+        // There used to be a difference between instance and device validation layers but that is no longer the case.
+        // Still good to include it for backwards compatibility.
+        deviceCreateInfo.enabledExtensionCount = 0;
+
+        if (_debugger.isValidationEnabled()) {
+            deviceCreateInfo.enabledLayerCount = _debugger.getValidationLayersCount();
+            deviceCreateInfo.ppEnabledLayerNames = _debugger.getValidationLayerNames();
+        } else {
+            deviceCreateInfo.enabledLayerCount = 0;
+        }
+
+        if (vkCreateDevice(_physicalDevice, &deviceCreateInfo, nullptr, &_device) != VK_FALSE) {
+            throw std::runtime_error("Failed to create logical device.");
+        }
+
+        vkGetDeviceQueue(_device, indices.graphicsFamily.value(), 0, &graphicsQueue);
     }
 
 }
