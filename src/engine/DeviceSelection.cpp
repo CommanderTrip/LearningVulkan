@@ -1,4 +1,4 @@
-#include "PhysicalDeviceSelection.hpp"
+#include "DeviceSelection.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -10,7 +10,7 @@ namespace pve {
      * @param device A physical device we are interested in.
      * @return Bool if the device is suitable for our use.
      */
-    bool PhysicalDeviceSelection::_isDeviceSuitable(VkPhysicalDevice device) {
+    bool DeviceSelection::_isDeviceSuitable(VkPhysicalDevice device) {
         // To evaluate the suitability of a device we can start by querying for some details
         VkPhysicalDeviceProperties deviceProperties;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
@@ -36,7 +36,7 @@ namespace pve {
      * @param device A physical device we want to check support for.
      * @return All indices of the supported families we need.
      */
-    PhysicalDeviceSelection::QueueFamilyIndices PhysicalDeviceSelection::_findQueueFamilies(VkPhysicalDevice device) {
+    DeviceSelection::QueueFamilyIndices DeviceSelection::_findQueueFamilies(VkPhysicalDevice device) {
         QueueFamilyIndices indices;
 
         // Query then store the queue family properties
@@ -63,7 +63,7 @@ namespace pve {
      * Looks over the devices on the system to find one we can use with Vulkan.
      * @param instance Reference to the current Vulkan Instance.
      */
-    void PhysicalDeviceSelection::pickPhysicalDevice(VkInstance &instance) {
+    void DeviceSelection::pickPhysicalDevice(VkInstance &instance) {
         // Get the number of devices
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -94,7 +94,7 @@ namespace pve {
     /**
      * Picks a logical device to interface with the physical device.
      */
-    void PhysicalDeviceSelection::pickLogicalDevice(Debugger debugger) {
+    void DeviceSelection::pickLogicalDevice(Debugger debugger) {
         // Why are we doing this again? Can't we save the results from the last time we did this?
         QueueFamilyIndices indices = _findQueueFamilies(_physicalDevice);
 

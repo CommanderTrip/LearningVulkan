@@ -16,15 +16,8 @@ namespace pve {
     VulkanConnection::VulkanConnection(const char* appName, const char* engineName) {
         _createInstance(appName, engineName);
         _setupDebugMessenger();
-        _physicalDevice.pickPhysicalDevice(_instance);
-        _physicalDevice.pickLogicalDevice(_debugger);
-    }
-
-    VulkanConnection::~VulkanConnection() {
-        if (_debugger.isValidationEnabled()) {
-            _debugger.destroyDebugUtilsMessengerEXT(_instance, _debugger.debugMessenger, nullptr);
-        }
-        vkDestroyInstance(_instance, nullptr);
+        _device.pickPhysicalDevice(_instance);
+        _device.pickLogicalDevice(_debugger);
     }
 
     void VulkanConnection::_createInstance(const char* appName, const char* engineName) {
@@ -95,6 +88,19 @@ namespace pve {
             VK_SUCCESS) {
             throw std::runtime_error("Failed to setup the debug messenger.");
         }
+    }
+
+    /**
+     * The `cleanUp` function from Learn Vulkan.
+     * It was intended that each object handles its own clean up, but it was not working... think it's a C++ skill
+     * issue.
+     */
+    void VulkanConnection::_cleanUp() {
+        vkDestroyDevice(*_device.getDevice(), nullptr);
+        if (_debugger.isValidationEnabled()) {
+            _debugger.destroyDebugUtilsMessengerEXT(_instance, _debugger.debugMessenger, nullptr);
+        }
+        vkDestroyInstance(_instance, nullptr);
     }
 
     std::vector<const char*> VulkanConnection::_getRequiredExtensions() {

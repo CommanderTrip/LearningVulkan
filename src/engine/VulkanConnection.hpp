@@ -4,16 +4,17 @@
 #include <vector>
 
 #include "Debugger.hpp"
-#include "PhysicalDeviceSelection.hpp"
+#include "DeviceSelection.hpp"
 
 namespace pve {
     class VulkanConnection {
         VkInstance _instance;
         Debugger _debugger;
-        PhysicalDeviceSelection _physicalDevice;
+        DeviceSelection _device;
 
         void _createInstance(const char *appName, const char *engineName);
         void _setupDebugMessenger();
+        void _cleanUp();
 
         std::vector<const char *> _getRequiredExtensions();
         bool _areRequiredExtSupported(const char **requiredExtensions, uint32_t requiredExtensionCount);
@@ -21,6 +22,6 @@ namespace pve {
 
     public:
         VulkanConnection(const char *appName, const char *engineName);
-        ~VulkanConnection();
+        ~VulkanConnection() { _cleanUp(); }
     };
 }
