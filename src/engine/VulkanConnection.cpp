@@ -16,6 +16,7 @@ namespace pve {
     VulkanConnection::VulkanConnection(const char* appName, const char* engineName) {
         _createInstance(appName, engineName);
         _setupDebugMessenger();
+        _physicalDevice.pickPhysicalDevice(_instance);
     }
 
     VulkanConnection::~VulkanConnection() {
@@ -138,4 +139,5 @@ namespace pve {
         }
         return supported;
     }
+
 }
