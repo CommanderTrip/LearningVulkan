@@ -1,3 +1,5 @@
+#include "RomulusApp.hpp"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -24,8 +26,6 @@ const bool enableValidationLayers = false;
 const bool enableValidationLayers = true;
 #endif
 
-// Because this function is an extension function, it is not automatically loaded. We have to look up its address
-// ourselves
 VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
                                       const VkAllocationCallbacks *pAllocator,
                                       VkDebugUtilsMessengerEXT *pDebugMessenger) {
@@ -996,12 +996,14 @@ private:
 };
 
 int main() {
-    HelloTriangleApplication app;
+    // HelloTriangleApplication app;
+    romulus::RomulusApp mainApp{};
 
     try {
-        app.run();
-    } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
+        // app.run();
+        mainApp.run();
+    } catch (const std::exception &ex) {
+        std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
     }
 
