@@ -2,6 +2,8 @@
 #include <Gl/glew.h>  // GLEW must be included before GLFW
 #include <GLFW/glfw3.h>
 
+#include <string>
+
 namespace pve {
     class Engine {
         const int WIDTH = 600;
@@ -14,7 +16,11 @@ namespace pve {
         Engine();
         ~Engine();
 
-        void run() const;
-        void draw() const;
+        void run();
+        void draw();
+
+    private:
+        void _createVertexBuffer();
+        uint32_t _createShader(const std::string &vertexShader, const std::string &fragmentShader);
     };
 }

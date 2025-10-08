@@ -5,7 +5,7 @@
 #include "Engine.hpp"
 
 int main() {
-    const pve::Engine engine{};
+    pve::Engine engine{};
 
     try {
         engine.run();

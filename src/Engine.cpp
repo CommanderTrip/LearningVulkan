@@ -29,7 +29,47 @@ namespace pve {
         glfwTerminate();
     }
 
-    void Engine::run() const {
+    void Engine::run() {
+        _createVertexBuffer();
+
+        // The 0 is the index of the attribute
+        // Because we've attributed the vertex buffer, OpenGL knows the vec4 passed in is actually a vec2 but it'll need
+        // a vec4 for gl_Position, so it will handle that conversion for us.
+        const std::string vertexShader =
+            "#version 330 core\n"
+            "\n"
+            "layout(location = 0) in vec4 position;\n"
+            "\n"
+            "void main() {\n"
+            "   gl_Position = position;\n"
+            "}\n";
+
+        const std::string fragmentShader =
+            "#version 330 core\n"
+            "\n"
+            "layout(location = 0) out vec4 color;\n"
+            "\n"
+            "void main() {\n"
+            "   color = vec4(1.0, 0.0, 0.0, 1.0);\n"
+            "}\n";
+        uint32_t shaderProgramId = _createShader(vertexShader, fragmentShader);
+        glUseProgram(shaderProgramId);
+
+        while (!glfwWindowShouldClose(_window)) {
+            draw();
+            glfwPollEvents();
+        }
+    }
+
+    void Engine::draw() {
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glfwSwapBuffers(_window);
+    }
+
+    void Engine::_createVertexBuffer() {
         // Create some Vertex Buffer
         uint32_t bufferId;
         glGenBuffers(1, &bufferId);
@@ -52,19 +92,63 @@ namespace pve {
          * Pointer: Offset from the start of the vertex to this attribute
          */
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, nullptr);
-        glEnableVertexAttribArray(bufferId);
-
-        while (!glfwWindowShouldClose(_window)) {
-            draw();
-            glfwPollEvents();
-        }
+        glEnableVertexAttribArray(0);
     }
 
-    void Engine::draw() const {
-        glClear(GL_COLOR_BUFFER_BIT);
+    /**
+     * Gives OpenGL the source code to the shaders, and makes it compile and link them into a single shader program.
+     *
+     * @param vertexShader Vertex shader source code.
+     * @param fragmentShader Fragment shader source code.
+     * @return An ID for the shader program.
+     */
+    uint32_t Engine::_createShader(const std::string &vertexShader, const std::string &fragmentShader) {
+        uint32_t programId = glCreateProgram();
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        const uint32_t vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+        const char *vertexSource = vertexShader.c_str();
+        glShaderSource(vertexShaderId, 1, &vertexSource, nullptr);
+        glCompileShader(vertexShaderId);
 
-        glfwSwapBuffers(_window);
+        const uint32_t fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+        const char *fragmentSource = fragmentShader.c_str();
+        glShaderSource(fragmentShaderId, 1, &fragmentSource, nullptr);
+        glCompileShader(fragmentShaderId);
+
+        // Do some error handling
+        int result;
+        glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &result);
+        if (GL_FALSE == result) {
+            int messageLength;
+            glGetShaderiv(vertexShaderId, GL_INFO_LOG_LENGTH, &messageLength);
+            char message[messageLength];
+            glGetShaderInfoLog(vertexShaderId, messageLength, &messageLength, message);
+            std::cerr << "Failed to compile vertex shader:\n" << message << std::endl;
+            glDeleteShader(vertexShaderId);
+            return 0;
+        }
+
+        glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &result);
+        if (GL_FALSE == result) {
+            int messageLength;
+            glGetShaderiv(fragmentShaderId, GL_INFO_LOG_LENGTH, &messageLength);
+            char message[messageLength];
+            glGetShaderInfoLog(fragmentShaderId, messageLength, &messageLength, message);
+            std::cerr << "Failed to compile fragment shader:\n" << message << std::endl;
+            glDeleteShader(fragmentShaderId);
+            return 0;
+        }
+
+        // Begin linking
+        glAttachShader(programId, vertexShaderId);
+        glAttachShader(programId, fragmentShaderId);
+        glLinkProgram(programId);
+        glValidateProgram(programId);
+
+        // We've compiled and linked so we can get rid of the intermediate objects
+        glDeleteShader(vertexShaderId);
+        glDeleteShader(fragmentShaderId);
+
+        return programId;
     }
 }
