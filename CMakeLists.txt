@@ -17,5 +17,9 @@ add_executable(${PROJECT_NAME} ${glLearning_SRC})
 find_package(glfw3 REQUIRED)
 target_link_libraries(${PROJECT_NAME} glfw)
 
+# Gets the OpenGL specific driver implementations
+find_package(GLEW REQUIRED)
+target_link_libraries(${PROJECT_NAME} GLEW::GLEW)
+
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} OpenGL::GL)

@@ -1,4 +1,5 @@
 #pragma once
+#include <Gl/glew.h>  // GLEW must be included before GLFW
 #include <GLFW/glfw3.h>
 
 namespace pve {

@@ -7,3 +7,4 @@ ColumnLimit: 120
 PointerAlignment: Right
 NamespaceIndentation: All
 FixNamespaceComments: false
+SortIncludes: Never
